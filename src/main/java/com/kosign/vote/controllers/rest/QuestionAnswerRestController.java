@@ -23,43 +23,67 @@ public class QuestionAnswerRestController {
     private QuestionAnswerProtocol questionAnswerProtocol;
 
     @PostMapping(value = "/find-question-answer", headers = "Accept=application/json")
-    public ResponseEntity<Map<String, Object>> findAllAcademicYear() {
+    public ResponseEntity<Map<String, Object>> findAllQuestionAnswer() {
         Map<String, Object> map = new HashMap<>();
+        Map<String, Object> questionMap = new HashMap<>();
+        Map<String, Object> answerMap;
+        List<Map<String, Object>> answers = new ArrayList<>();
 
         List<QuestionAnswer> questionAnswers = questionAnswerProtocol.findQuestionAnswerByQuestionUUID("8976042f-cc0e-4298-8353-0180bc5056bb");
 
-        map.put("data", questionAnswers);
+        questionMap.put("question", questionAnswers.get(0).getQuestion());
 
-        return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
+        for (QuestionAnswer questionAnswer : questionAnswers) {
+            answerMap = new HashMap<>();
+            answerMap.put("count_vote", questionAnswer.getCountVote());
+            answerMap.put("answer", questionAnswer.getAnswer());
+            answerMap.put("answer_uuid", questionAnswer.getAnswerUUID());
+            answers.add(answerMap);
+        }
+
+        questionMap.put("answers", answers);
+
+        if (questionAnswers.size() > 0) {
+            map.put("DATA", questionMap);
+            map.put("MESSAGE", "Successfully.");
+        } else map.put("MESSAGE", "Unsuccessfully.");
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
     @PostMapping(value = "/insert-vote", produces = {"application/json", "application/xml", "text/plain;charset=UTF-8"})
-    public ResponseEntity<Map<String, Object>> registerNotification(@RequestBody InsertVote insertVote) {
+    public ResponseEntity<Map<String, Object>> insertVote(@RequestBody InsertVote insertVote) {
         Map<String, Object> map = new HashMap<>();
-        Map<String, Object> mapQuestion;
 
         String actionCode = questionAnswerProtocol.insertVote(insertVote);
 
         if (actionCode.equalsIgnoreCase("00000")) {
+            Map<String, Object> questionMap = new HashMap<>();
+            Map<String, Object> answerMap;
+            List<Map<String, Object>> answers = new ArrayList<>();
+
             List<QuestionAnswer> questionAnswers = questionAnswerProtocol.findQuestionAnswerByQuestionUUID("8976042f-cc0e-4298-8353-0180bc5056bb");
-            List<Map<String, Object>> questions = new ArrayList<>();
+
+            questionMap.put("question", questionAnswers.get(0).getQuestion());
 
             for (QuestionAnswer questionAnswer : questionAnswers) {
-                mapQuestion = new HashMap<>();
-                System.out.println("Before " + questionAnswer.toString());
-                mapQuestion.put("countVote", questionAnswer.getCountVote());
-                mapQuestion.put("question", questionAnswer.getQuestion());
-                mapQuestion.put("answer", questionAnswer.getAnswer());
-                mapQuestion.put("answerUUID", questionAnswer.getAnswerUUID());
-                questions.add(mapQuestion);
+                answerMap = new HashMap<>();
+                answerMap.put("count_vote", questionAnswer.getCountVote());
+                answerMap.put("answer", questionAnswer.getAnswer());
+                answerMap.put("answer_uuid", questionAnswer.getAnswerUUID());
+                answers.add(answerMap);
             }
 
-            socketIOController.broadcastEvent("onVote", questions);
+            questionMap.put("answers", answers);
 
-            map.put("MESSAGE", "successfully.");
+            if (questionAnswers.size() > 0) {
+                socketIOController.broadcastEvent("onVote", questionMap);
+                map.put("DATA", questionMap);
+                map.put("MESSAGE", "Successfully.");
+            }
         } else map.put("MESSAGE", "unsuccessfully.");
 
-        return new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
+        return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
 }

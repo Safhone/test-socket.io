@@ -24,18 +24,12 @@ public class SocketIOConfiguration {
         server = new SocketIOServer(config);
         server.start();
 
-        server.addConnectListener(new ConnectListener() {
-            @Override
-            public void onConnect(SocketIOClient client) {
-                System.out.println("Client connected : " + client.getSessionId());
-            }
+        server.addConnectListener((SocketIOClient client) -> {
+            System.out.println("Client connected : " + client.getSessionId());
         });
 
-        server.addDisconnectListener(new DisconnectListener() {
-            @Override
-            public void onDisconnect(SocketIOClient client) {
-                System.out.println("Client disconnected : " + client.getSessionId());
-            }
+        server.addDisconnectListener((SocketIOClient client) -> {
+            System.out.println("Client disconnected : " + client.getSessionId());
         });
 
         return server;

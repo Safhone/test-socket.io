@@ -22,24 +22,10 @@ public class SocketIOController {
     @Autowired
     public SocketIOController(SocketIOServer server) {
         this.namespace = server.addNamespace("/vote");
-        this.namespace.addEventListener("userVote", QuestionAnswer.class, onUserVote);
     }
-
-    public DataListener<QuestionAnswer> onUserVote = new DataListener<QuestionAnswer>() {
-        @Override
-        public void onData(SocketIOClient socketIOClient, QuestionAnswer questionAnswer, AckRequest ackRequest) throws Exception {
-            System.out.println("Listen on even userBid" + questionAnswer.getCountVote());
-            namespace.getBroadcastOperations().sendEvent("onVote", socketIOClient, questionAnswer);
-            System.out.println(questionAnswer.toString());
-        }
-    };
 
     public void broadcastEvent(String event, Object data){
         this.getNamespace().getBroadcastOperations().sendEvent(event,data);
-    }
-
-    public void stopServer() {
-        this.stopServer();
     }
 
 }

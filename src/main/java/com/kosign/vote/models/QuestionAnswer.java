@@ -1,20 +1,20 @@
 package com.kosign.vote.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class QuestionAnswer {
 
+    @JsonProperty("count_vote")
     private String countVote;
+
     private String question;
+
     private String answer;
+
+    @JsonProperty("answer_uuid")
     private String answerUUID;
 
     public QuestionAnswer() {
-    }
-
-    public QuestionAnswer(String countVote, String question, String answer, String answerUUID) {
-        this.countVote = countVote;
-        this.question = question;
-        this.answer = answer;
-        this.answerUUID = answerUUID;
     }
 
     public String getCountVote() {
